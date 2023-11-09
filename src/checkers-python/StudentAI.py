@@ -77,9 +77,9 @@ class StudentAI():
     def get_early_heuristic(self, board):
         black = 0
         white = 0
-        for row in range(len(board)):
-            for col in range(len(board[0])):
-                piece = board[row][col]
+        for row in range(board.row):
+            for col in range(board.col):
+                piece = board.board[row][col]
                 if piece != '.':
                     if piece.color == 'B':
                         if piece.is_king:
