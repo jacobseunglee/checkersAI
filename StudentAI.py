@@ -1,4 +1,5 @@
 from random import randint
+import math
 from BoardClasses import Move
 from BoardClasses import Board
 #The following part should be completed by students.
@@ -16,6 +17,41 @@ class StudentAI():
         self.color = 2
     def get_move(self,move):
         if len(move) != 0:
+            self.board.make_move(move, self.opponent[self.color])
+        else:
+            self.color = 1    
+        def minmax(move, color, depth):
+            
+            if depth <= 0:
+                return self.board.black_count - self.board.white_count
+            if len(move) != 0:
+                self.board.make_move(move, self.opponent[color])
+            else:
+                color = self.opponent[color]
+            if self.board.is_win(self.opponent[color]):
+                return self.opponent[color]
+            moves = self.board.get_all_possible_moves(color)
+            ma = math.inf
+            if color == self.color:
+                ma *= -1
+            for index in range(len(moves)):
+                for inner in range(len(moves[index])):
+                    if color == self.color:
+                        ma = max([minmax(moves[index][inner], self.opponent[color], depth -1)])
+                    else:
+                        ma = min([minmax(moves[index][inner], self.opponent[color], depth -1)])
+                    if depth > 1:
+                        self.board.undo()
+            return ma
+        moves = self.board.get_all_possible_moves(self.color)
+        for index in range(len(moves)):
+            for inner in range(len(moves[index])):
+                next_move = max([(minmax(moves[index][inner],self.opponent[self.color], 3),moves[index][inner])], key = lambda x : x[0])
+                self.board.undo()
+        self.board.make_move(next_move[1],self.color)
+        return next_move[1]
+        '''
+        if len(move) != 0:
             self.board.make_move(move,self.opponent[self.color])
         else:
             self.color = 1
@@ -25,3 +61,6 @@ class StudentAI():
         move = moves[index][inner_index]
         self.board.make_move(move,self.color)
         return move
+        ''' 
+        
+
