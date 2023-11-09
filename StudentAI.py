@@ -4,6 +4,7 @@ from BoardClasses import Move
 from BoardClasses import Board
 #The following part should be completed by students.
 #Students can modify anything except the class name and exisiting functions and varibles.
+DEPTH = 3
 class StudentAI():
 
     def __init__(self,col,row,p):
@@ -25,7 +26,7 @@ class StudentAI():
         def minmax(move, color, depth):
             # if depth limit is reached then return the heurstic of percentage of black pieces over total pieces
             if depth <= 0:
-                return self.board.black_count / (self.board.black_count + self.board.white_count)
+                return self.get_early_heuristic(self.board)
             # make previous turns move here
             if len(move) != 0:
                 self.board.make_move(move, self.opponent[color])
@@ -57,7 +58,7 @@ class StudentAI():
         moves = self.board.get_all_possible_moves(self.color)
         for index in range(len(moves)):
             for inner in range(len(moves[index])):
-                next_move = max([(minmax(moves[index][inner],self.opponent[self.color], 3),moves[index][inner])], key = lambda x : x[0])
+                next_move = max([(minmax(moves[index][inner],self.opponent[self.color], DEPTH),moves[index][inner])], key = lambda x : x[0])
                 self.board.undo()
         self.board.make_move(next_move[1],self.color)
         return next_move[1]
@@ -73,5 +74,24 @@ class StudentAI():
         self.board.make_move(move,self.color)
         return move
         ''' 
-        
+    def get_early_heuristic(self, board):
+        black = 0
+        white = 0
+        for row in range(len(board)):
+            for col in range(len(board[0])):
+                piece = board[row][col]
+                if piece != '.':
+                    if piece.color == 'B':
+                        if piece.is_king:
+                            black += .7
+                        else:
+                            black += .3
+                    else:
+                        if piece.is_king:
+                            white += .7
+                        else:
+                            white += .3
+        return black / (black + white)
+
+
 
