@@ -4,7 +4,7 @@ winCount = 0
 rounds = 100
 
 for i in range(rounds):
-    os.system("python3 ./AI_Runner.py 8 8 3 l ../main.py ./Sample_AIs/Random_AI/main.py > tmp.txt")
+    os.system("python3 ./AI_Runner.py 8 8 3 l ../src/checkers-python/main.py ./Sample_AIs/Random_AI/main.py > tmp.txt")
     with open('tmp.txt') as f:
         for line in f:
             pass
