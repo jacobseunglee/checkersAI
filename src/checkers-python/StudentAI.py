@@ -4,7 +4,7 @@ from BoardClasses import Move
 from BoardClasses import Board
 #The following part should be completed by students.
 #Students can modify anything except the class name and exisiting functions and varibles.
-DEPTH = 5
+DEPTH = 4
 class StudentAI():
 
     def __init__(self,col,row,p):
@@ -26,7 +26,7 @@ class StudentAI():
         def minmax(move, color, depth):
             # if depth limit is reached then return the heurstic of percentage of black pieces over total pieces
             if depth <= 0:
-                return self.get_early_heuristic(self.board)
+                return self.get_early_heuristic(self.board, self.color)
             # make previous turns move here
             if len(move) != 0:
                 self.board.make_move(move, self.opponent[color])
@@ -34,10 +34,10 @@ class StudentAI():
                 color = self.opponent[color]
             # check for win here return 0 if white wins 1 if black wins
             if self.board.is_win(self.opponent[color]):
-                if self.opponent[color] == 1:
-                    return 0
-                if self.opponent[color] == 2:
+                if self.opponent[color] == self.color:
                     return 1
+                else:
+                    return 0
             
             moves = self.board.get_all_possible_moves(color)
             # init current max to infinity, negative if MAX player and positive if MIN player
@@ -67,7 +67,7 @@ class StudentAI():
                 output.write(str(next_move[0])+ ' ')
             output.write("\n")        
         self.board.make_move(next_move[1],self.color)
-        output.write(f"final: {next_move[0]}")
+        output.write(f"final: {next_move[0]}\n")
         return next_move[1]
         '''
         if len(move) != 0:
@@ -81,7 +81,7 @@ class StudentAI():
         self.board.make_move(move,self.color)
         return move
         ''' 
-    def get_early_heuristic(self, board):
+    def get_early_heuristic(self, board, turn):
         black = 0
         white = 0
         for row in range(board.row):
@@ -98,7 +98,7 @@ class StudentAI():
                             white += 1.2
                         else:
                             white += 1
-        return black / (black + white)
+        return black / (black + white) if turn == 1 else white / (black+white)
 
 
 
