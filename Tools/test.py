@@ -23,10 +23,7 @@ for i in range(rounds):
         # Tie
         winCount += 1
     elif stuff[1] == '1':
-        # Player 1 won
-        pass
-    else:
-        # Player 2 won
+        # player 1 won
         winCount += 1
     print(f"current win ratio: {winCount/(i+1)}")
 f.close()
