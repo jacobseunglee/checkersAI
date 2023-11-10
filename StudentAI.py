@@ -4,7 +4,7 @@ from BoardClasses import Move
 from BoardClasses import Board
 #The following part should be completed by students.
 #Students can modify anything except the class name and exisiting functions and varibles.
-DEPTH = 3
+DEPTH = 5
 class StudentAI():
 
     def __init__(self,col,row,p):
@@ -34,7 +34,10 @@ class StudentAI():
                 color = self.opponent[color]
             # check for win here return 0 if white wins 1 if black wins
             if self.board.is_win(self.opponent[color]):
-                return 0 if self.opponent[color] == 1 else 1
+                if self.opponent[color] == 1:
+                    return 0
+                if self.opponent[color] == 2:
+                    return 1
             
             moves = self.board.get_all_possible_moves(color)
             # init current max to infinity, negative if MAX player and positive if MIN player
@@ -56,11 +59,15 @@ class StudentAI():
             return ma
         # initial pass through of all possible moves
         moves = self.board.get_all_possible_moves(self.color)
+        output = open("debug.txt", 'a')
         for index in range(len(moves)):
             for inner in range(len(moves[index])):
-                next_move = max([(minmax(moves[index][inner],self.opponent[self.color], DEPTH),moves[index][inner])], key = lambda x : x[0])
+                next_move = (max([minmax(moves[index][inner],self.opponent[self.color], DEPTH)]),moves[index][inner])
                 self.board.undo()
+                output.write(str(next_move[0])+ ' ')
+            output.write("\n")        
         self.board.make_move(next_move[1],self.color)
+        output.write(f"final: {next_move[0]}")
         return next_move[1]
         '''
         if len(move) != 0:
@@ -77,20 +84,20 @@ class StudentAI():
     def get_early_heuristic(self, board):
         black = 0
         white = 0
-        for row in range(len(board)):
-            for col in range(len(board[0])):
-                piece = board[row][col]
+        for row in range(board.row):
+            for col in range(board.col):
+                piece = board.board[row][col]
                 if piece != '.':
                     if piece.color == 'B':
                         if piece.is_king:
-                            black += .7
+                            black += 1.2
                         else:
-                            black += .3
+                            black += 1
                     else:
                         if piece.is_king:
-                            white += .7
+                            white += 1.2
                         else:
-                            white += .3
+                            white += 1
         return black / (black + white)
 
 
