@@ -14,7 +14,6 @@ class StudentAI():
         self.p = p
         self.board = Board(col,row,p)
         self.board.initialize_game()
-        self.color = ''
         self.opponent = {1:2,2:1}
         self.color = 2
     def get_move(self,move):
@@ -92,7 +91,7 @@ class StudentAI():
                         white += 1.2
                     else:
                         white += 1
-        return black / (black + white) if self.color == 1 else white / (black+white)
+        return (black / (black + white)) if self.color == 1 else (white / (black+white))
 
 
 
