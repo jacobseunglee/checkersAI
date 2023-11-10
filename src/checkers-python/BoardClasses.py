@@ -94,7 +94,7 @@ class Board:
         """
         Makes Move on the board
         @param move: Move object provided by the StudentAI, Uses this parameter to make the move on the board
-        @param turn: this parameter tracks the current turn. either player 1 (white) or player 2(black)
+        @param turn: this parameter tracks the current turn. either player 1 (black) or player 2 (white)
         @return:
         @raise InvalidMoveError: raises this objection if the move provided isn't valid on the current board
         """
@@ -444,5 +444,4 @@ if __name__ == "__main__":
     print("Undo")
     b.undo()
     b.show_board()
-
 
