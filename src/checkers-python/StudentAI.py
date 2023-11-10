@@ -1,5 +1,6 @@
 from random import randint
 import math
+from copy import deepcopy
 from BoardClasses import Move
 from BoardClasses import Board
 #The following part should be completed by students.
@@ -23,21 +24,17 @@ class StudentAI():
         else:
             self.color = 1
                                
-        def minmax(move, color, depth):
+        def minmax(color, depth, board):
             # if depth limit is reached then return the heurstic of percentage of black pieces over total pieces
-
-            self.board.make_move(move, self.opponent[color])
-            if depth <= 0:
-                return self.get_early_heuristic(self.board, self.color)
-            # make previous turns move here
-            # check for win here return 0 if white wins 1 if black wins
-            if self.board.is_win(self.opponent[color]):
-                if self.opponent[color] == self.color:
+            # check for win
+            if board.is_win(color):
+                if color == self.color:
                     return 1
                 else:
                     return 0
-            
-            moves = self.board.get_all_possible_moves(color)
+            elif depth <= 0:
+                return self.get_early_heuristic(board)
+            moves = board.get_all_possible_moves(color)
             # init current max to infinity, negative if MAX player and positive if MIN player
             ma = math.inf
             if color == self.color:
@@ -46,25 +43,26 @@ class StudentAI():
             for index in range(len(moves)):
                 for inner in range(len(moves[index])):
                     # MAX player
+                    new_board = deepcopy(board)
                     if color == self.color:
-                        ma = max([minmax(moves[index][inner], self.opponent[color], depth -1)])
+                        new_board.make_move(moves[index][inner], color)
+                        ma = max([minmax(self.opponent[color], depth -1, new_board)])
                     # MIN player
                     else:
-                        ma = min([minmax(moves[index][inner], self.opponent[color], depth -1)])
-                    # if depth is 1 then the last move did not actually make a move so we only undo if depth is > 1.
-                    self.board.undo()
+                        new_board.make_move(moves[index][inner], color)
+                        ma = min([minmax(self.opponent[color], depth -1, new_board)])
             return ma
         # initial pass through of all possible moves
         moves = self.board.get_all_possible_moves(self.color)
         output = open("debug.txt", 'a')
         for index in range(len(moves)):
             for inner in range(len(moves[index])):
-                next_move = (max([minmax(moves[index][inner],self.opponent[self.color], DEPTH)]),moves[index][inner])
-                self.board.undo()
+                next_move = (max([minmax(self.opponent[self.color], DEPTH, self.board)]),moves[index][inner])
                 output.write(str(next_move[0])+ ' ')
-            output.write("\n")        
-        self.board.make_move(next_move[1],self.color)
-        output.write(f"final: {next_move[0]}\n")
+                output.write("\n")        
+
+        output.write(f"final: {next_move[0]}\n")        
+        self.board.make_move(next_move[1], self.color)
         return next_move[1]
         '''
         if len(move) != 0:
@@ -78,24 +76,23 @@ class StudentAI():
         self.board.make_move(move,self.color)
         return move
         ''' 
-    def get_early_heuristic(self, board, turn):
+    def get_early_heuristic(self, board):
         black = 0
         white = 0
         for row in range(board.row):
             for col in range(board.col):
                 piece = board.board[row][col]
-                if piece != '.':
-                    if piece.color == 'B':
-                        if piece.is_king:
-                            black += 1.2
-                        else:
-                            black += 1
+                if piece.color == 'B':
+                    if piece.is_king:
+                        black += 1.2
                     else:
-                        if piece.is_king:
-                            white += 1.2
-                        else:
-                            white += 1
-        return black / (black + white) if turn == 1 else white / (black+white)
+                        black += 1
+                elif piece.color == 'W':
+                    if piece.is_king:
+                        white += 1.2
+                    else:
+                        white += 1
+        return black / (black + white) if self.color == 1 else white / (black+white)
 
 
 
