@@ -4,7 +4,7 @@ from BoardClasses import Move
 from BoardClasses import Board
 #The following part should be completed by students.
 #Students can modify anything except the class name and exisiting functions and varibles.
-DEPTH = 3
+DEPTH = 4
 class StudentAI():
 
     def __init__(self,col,row,p):
@@ -84,17 +84,16 @@ class StudentAI():
         for row in range(board.row):
             for col in range(board.col):
                 piece = board.board[row][col]
-                if piece != '.':
-                    if piece.color == 'B':
-                        if piece.is_king:
-                            black += 1.2
-                        else:
-                            black += 1
+                if piece.color == 'B':
+                    if piece.is_king:
+                        black += 1.2
                     else:
-                        if piece.is_king:
-                            white += 1.2
-                        else:
-                            white += 1
+                        black += 1
+                elif piece.color == 'W':
+                    if piece.is_king:
+                        white += 1.2
+                    else:
+                        white += 1
         return black / (black + white) if turn == 1 else white / (black+white)
 
 
