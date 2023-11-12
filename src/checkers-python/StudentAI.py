@@ -57,9 +57,10 @@ class StudentAI():
         # initial pass through of all possible moves
         moves = self.board.get_all_possible_moves(self.color)
         output = open("debug.txt", 'a')
+        next_move = (-math.inf, '')
         for index in range(len(moves)):
             for inner in range(len(moves[index])):
-                next_move = (max([minmax(moves[index][inner],self.opponent[self.color], DEPTH)]),moves[index][inner])
+                next_move = max(next_move, (minmax(moves[index][inner],self.opponent[self.color], DEPTH),moves[index][inner]), key = lambda x: x[0])
                 self.board.undo()
                 output.write(str(next_move[0])+ ' ')
             output.write("\n")        
