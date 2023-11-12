@@ -1,7 +1,8 @@
 import os
 
 winCount = 0
-rounds = 1000
+tieCount = 0
+rounds = 100
 stop = False
 for i in range(rounds):
     
@@ -21,13 +22,15 @@ for i in range(rounds):
 
     if len(stuff) == 1:
         # Tie
-        winCount += 1
+        tieCount += 1
     elif stuff[1] == '1':
         # player 1 won
         winCount += 1
-    print(f"current win ratio: {winCount/(i+1)}")
+    print("current win ratio:", (winCount + tieCount) / (i+1))
 f.close()
-percentage = winCount / (i+1)
+percentage = (winCount + tieCount) / (i+1)
 
-print(winCount)
-print(percentage)
+print("Games played:", rounds)
+print("Wins:", winCount)
+print("Ties:", tieCount)
+print("Win Ratio:", percentage)
