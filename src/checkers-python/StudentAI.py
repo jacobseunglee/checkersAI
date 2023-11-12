@@ -4,7 +4,7 @@ from BoardClasses import Move
 from BoardClasses import Board
 #The following part should be completed by students.
 #Students can modify anything except the class name and exisiting functions and varibles.
-DEPTH = 2
+DEPTH = 3
 class StudentAI():
 
     def __init__(self,col,row,p):
@@ -24,12 +24,13 @@ class StudentAI():
             self.color = 1
                                
         def minmax(move, color, depth):
-            # if depth limit is reached then return the heurstic of percentage of black pieces over total pieces
-
+            # make previous turns move here
             self.board.make_move(move, self.opponent[color])
+
+            # if depth limit is reached then return the heurstic of percentage of black pieces over total pieces
             if depth <= 0:
                 return self.get_early_heuristic(self.board, self.color)
-            # make previous turns move here
+
             # check for win here return 0 if white wins 1 if black wins
             if self.board.is_win(self.opponent[color]):
                 if self.opponent[color] == self.color:
@@ -47,11 +48,10 @@ class StudentAI():
                 for inner in range(len(moves[index])):
                     # MAX player
                     if color == self.color:
-                        ma = max([minmax(moves[index][inner], self.opponent[color], depth -1)])
+                        ma = max(ma, minmax(moves[index][inner], self.opponent[color], depth -1))
                     # MIN player
                     else:
-                        ma = min([minmax(moves[index][inner], self.opponent[color], depth -1)])
-                    # if depth is 1 then the last move did not actually make a move so we only undo if depth is > 1.
+                        ma = min(ma, minmax(moves[index][inner], self.opponent[color], depth -1))
                     self.board.undo()
             return ma
         # initial pass through of all possible moves
