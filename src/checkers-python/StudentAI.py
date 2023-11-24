@@ -87,6 +87,9 @@ class StudentAI():
                 sim_move = Move([])
                 while True:
                     sim_move = get_random_move(player, board)
+                    if sim_move == None:
+                        # Current player just lost
+                        return 2 if player == 1 else 1
                     board.make_move(sim_move, player)
                     winPlayer = board.is_win(player)
                     if winPlayer != 0:
@@ -99,7 +102,12 @@ class StudentAI():
 
             def get_random_move(color, board):
                 # From base code, get a random move
+
                 moves = board.get_all_possible_moves(color)
+                # Check for empty list
+                if len(moves) == 0:
+                    return None
+
                 index = randint(0,len(moves)-1)
                 inner_index =  randint(0,len(moves[index])-1)
                 move = moves[index][inner_index]
@@ -119,7 +127,7 @@ class StudentAI():
                     win_cnt[str(curr_move)] = 0
 
             # Simulation loop
-            simulate_total = 1 # Total number of simulations to be ran (this can be changed to be time based)
+            simulate_total = 1000 # Total number of simulations to be ran (this can be changed to be time based)
             for i in range(simulate_total):
                 move_init = get_random_move(self.color, self.board)
                 simulate_cnt[str(move_init)] += 1
@@ -128,6 +136,7 @@ class StudentAI():
                 winner = simulate(board_copy)
                 if winner == 1:
                     win_cnt[str(move_init)] += 1
+                self.board.undo()
 
             # Get move with best winrate
             best_move = (Move([]), -1)
@@ -140,6 +149,7 @@ class StudentAI():
                     if wr > best_move[1]:
                         best_move = (curr_move, -1)
 
+            self.board.make_move(best_move[0], self.color)
             return best_move[0]
 
         '''
