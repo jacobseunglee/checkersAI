@@ -1,5 +1,6 @@
 from random import randint
 import math
+from copy import deepcopy
 from BoardClasses import Move
 from BoardClasses import Board
 #The following part should be completed by students.
@@ -73,16 +74,73 @@ class StudentAI():
             #output.write(f"final: {next_move[0]}\n")
             return next_move[1]
         elif method == "mcts":
-            if len(move) != 0:
-                self.board.make_move(move,self.opponent[self.color])
-            else:
-                self.color = 1
+            def simulate(board):
+                """
+                Simulates a single game from the current state and returns the winner. Logic taken from GameLogic.py
+                Return values:
+                -1 = Tie
+                1 = player 1 wins (black)
+                2 = player 2 wins (white)
+                """
+                player = 2 # Initial move made by black, white's turn now
+                winPlayer = 0
+                sim_move = Move([])
+                while True:
+                    sim_move = get_random_move(player, board)
+                    board.make_move(sim_move, player)
+                    winPlayer = board.is_win(player)
+                    if winPlayer != 0:
+                        break
+                    if player == 1:
+                        player = 2
+                    else:
+                        player = 1
+                return winPlayer
+
+            def get_random_move(color, board):
+                # From base code, get a random move
+                moves = board.get_all_possible_moves(color)
+                index = randint(0,len(moves)-1)
+                inner_index =  randint(0,len(moves[index])-1)
+                move = moves[index][inner_index]
+                #self.board.make_move(move,self.color)
+                return move
+
+            output = open("debug.txt", 'a')
+
+            # For each move, keep track of number of games simulated with that move along with how many wins
             moves = self.board.get_all_possible_moves(self.color)
-            index = randint(0,len(moves)-1)
-            inner_index =  randint(0,len(moves[index])-1)
-            move = moves[index][inner_index]
-            self.board.make_move(move,self.color)
-            return move
+            simulate_cnt = {}
+            win_cnt = {}
+            for index in range(len(moves)):
+                for inner in range(len(moves[index])):
+                    curr_move = moves[index][inner]
+                    simulate_cnt[str(curr_move)] = 0
+                    win_cnt[str(curr_move)] = 0
+
+            # Simulation loop
+            simulate_total = 1 # Total number of simulations to be ran (this can be changed to be time based)
+            for i in range(simulate_total):
+                move_init = get_random_move(self.color, self.board)
+                simulate_cnt[str(move_init)] += 1
+                self.board.make_move(move_init, self.color)
+                board_copy = deepcopy(self.board)
+                winner = simulate(board_copy)
+                if winner == 1:
+                    win_cnt[str(move_init)] += 1
+
+            # Get move with best winrate
+            best_move = (Move([]), -1)
+            for index in range(len(moves)):
+                for inner in range(len(moves[index])):
+                    curr_move = moves[index][inner]
+                    if simulate_cnt[str(curr_move)] == 0:
+                        continue
+                    wr = win_cnt[str(curr_move)] / simulate_cnt[str(curr_move)]
+                    if wr > best_move[1]:
+                        best_move = (curr_move, -1)
+
+            return best_move[0]
 
         '''
         if len(move) != 0:
