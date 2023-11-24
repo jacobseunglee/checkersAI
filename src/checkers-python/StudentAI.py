@@ -54,19 +54,36 @@ class StudentAI():
                         ma = min(ma, minmax(moves[index][inner], self.opponent[color], depth -1))
                     self.board.undo()
             return ma
-        # initial pass through of all possible moves
-        moves = self.board.get_all_possible_moves(self.color)
-        #output = open("debug.txt", 'a')
-        next_move = (-math.inf, '')
-        for index in range(len(moves)):
-            for inner in range(len(moves[index])):
-                next_move = max(next_move, (minmax(moves[index][inner],self.opponent[self.color], DEPTH),moves[index][inner]), key = lambda x: x[0])
-                self.board.undo()
-                #output.write(str(next_move[0])+ ' ')
-            #output.write("\n")        
-        self.board.make_move(next_move[1],self.color)
-        #output.write(f"final: {next_move[0]}\n")
-        return next_move[1]
+        
+        #method = "minimax"
+        method = "mcts"
+
+        if method == "minimax":
+            # initial pass through of all possible moves
+            moves = self.board.get_all_possible_moves(self.color)
+            #output = open("debug.txt", 'a')
+            next_move = (-math.inf, '')
+            for index in range(len(moves)):
+                for inner in range(len(moves[index])):
+                    next_move = max(next_move, (minmax(moves[index][inner],self.opponent[self.color], DEPTH),moves[index][inner]), key = lambda x: x[0])
+                    self.board.undo()
+                    #output.write(str(next_move[0])+ ' ')
+                #output.write("\n")        
+            self.board.make_move(next_move[1],self.color)
+            #output.write(f"final: {next_move[0]}\n")
+            return next_move[1]
+        elif method == "mcts":
+            if len(move) != 0:
+                self.board.make_move(move,self.opponent[self.color])
+            else:
+                self.color = 1
+            moves = self.board.get_all_possible_moves(self.color)
+            index = randint(0,len(moves)-1)
+            inner_index =  randint(0,len(moves[index])-1)
+            move = moves[index][inner_index]
+            self.board.make_move(move,self.color)
+            return move
+
         '''
         if len(move) != 0:
             self.board.make_move(move,self.opponent[self.color])
