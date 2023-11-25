@@ -59,6 +59,7 @@ class StudentAI():
         
         #method = "minimax"
         method = "mcts"
+        output = open("debug.txt", 'a') # debug file
 
         if method == "minimax":
             # initial pass through of all possible moves
@@ -83,6 +84,7 @@ class StudentAI():
                     self.player = player
                     self.board = board
                     self.move = move
+                    self.translation = {}
                     self.children = {}
                     self.opponent = {1:2,2:1}
                 
@@ -99,6 +101,7 @@ class StudentAI():
                             new_board = deepcopy(self.board)
                             new_board.make_move(moves[index][inner_index], self.player)
                             self.children[str(moves[index][inner_index])] = Node(self, self.opponent[self.player], new_board, str(moves[index][inner_index]))
+                            self.translation[str(moves[index][inner_index])] = moves[index][inner_index]
                 def get_random_move(self, random_list):
                     # From base code, get a random move
                     index = randint(0,len(random_list)-1)
@@ -106,34 +109,37 @@ class StudentAI():
                     #self.board.make_move(move,self.color)
                     return move
                 def simulate(self):
-                        """
-                        Simulates a single game from the current state and returns the winner. Logic taken from GameLogic.py
-                        Return values:
-                        -1 = Tie
-                        1 = player 1 wins (black)
-                        2 = player 2 wins (white)
-                        """
-                        player = self.player
-                        board = deepcopy(self.board)
-                        while True:
-                            moves = board.get_all_possible_moves(player)
-                            random_list = [moves[index][inner_index] for index in range(len(moves)) for inner_index in range(len(moves[index]))]
-                            if len(random_list) == 0:
-                                return self.opponent[player]
-                            sim_move = self.get_random_move(random_list)
-                            board.make_move(sim_move, player)
-                            boardwin = board.is_win(player)
-                            if boardwin == self.player:
-                                return self.player
-                            elif boardwin == self.opponent[self.player]:
-                                return self.opponent[self.player]
-                            elif boardwin == -1:
-                                return -1
-                            player = self.opponent[self.player]
+                    """
+                    Simulates a single game from the current state and returns the winner. Logic taken from GameLogic.py
+                    Return values:
+                    -1 = Tie
+                    1 = player 1 wins (black)
+                    2 = player 2 wins (white)
+                    """
+                    player = self.player
+                    board = deepcopy(self.board)
+                    while True:
+                        moves = board.get_all_possible_moves(player)
+                        random_list = [moves[index][inner_index] for index in range(len(moves)) for inner_index in range(len(moves[index]))]
+                        if len(random_list) == 0:
+                            return self.opponent[player]
+                        sim_move = self.get_random_move(random_list)
+
+                        board.show_board(output)
+                        output.write(str(sim_move))
+                        output.write('\n')
+
+                        board.make_move(sim_move, player)
+                        boardwin = board.is_win(player)
+                        if boardwin == self.player:
+                            return self.player
+                        elif boardwin == self.opponent[self.player]:
+                            return self.opponent[self.player]
+                        elif boardwin == -1:
+                            return -1
+                        player = self.opponent[self.player]
                 def mcts(self):
                     cur = self
-
-                    output = open("debug.txt", 'a')
 
                     while len(cur.children) > 0:
                         m = max([x.calculate_ucb_score() for x in cur.children.values()])
@@ -148,9 +154,12 @@ class StudentAI():
                     else:
                         cur.init_children()
                         random_list = [y for y in cur.children]
-                        next_move  = self.get_random_move(random_list)
-                        cur = cur.children[next_move]
-                        win = cur.simulate()
+                        if len(random_list) == 0:
+                            win = self.opponent[cur.player]
+                        else:
+                            next_move  = self.get_random_move(random_list)
+                            cur = cur.children[next_move]
+                            win = cur.simulate()
                         cur.wins += 1 if win == cur.player else 0
                     cur.sims += 1
                     parent = cur
@@ -159,10 +168,12 @@ class StudentAI():
                         parent.wins += 1 if win == parent.player else 0
                         parent.sims += 1
             root = Node(None, self.color, self.board, None)
-            simulate_total = 4
+            simulate_total = 100
             for _ in range(simulate_total):
                 root.mcts()
-            return max([child for child in root.children], key = lambda x: root.children[x].wins / root.children[x].sims if root.children[x].sims > 0 else -1)
+            next_move = max([child for child in root.children], key = lambda x: root.children[x].wins / root.children[x].sims if root.children[x].sims > 0 else -1)
+            self.board.make_move(root.translation[next_move], self.color)
+            return root.translation[next_move]
                 
 
         '''
