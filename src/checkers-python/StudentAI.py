@@ -158,9 +158,9 @@ class StudentAI():
                         cur = cur.children[self.get_random_move(random_list)]
                     if cur.sims == 0:
                         win = cur.simulate()
-                        if win == cur.player:
+                        if win == self.opponent[cur.player]:
                             cur.wins += 1 
-                        elif win == -1 and cur.player == root.player:
+                        elif win == -1 and cur.player != root.player:
                             cur.wins += 1
                     else:
                         cur.init_children()
@@ -179,10 +179,10 @@ class StudentAI():
                     parent = cur
                     while parent.parent:
                         parent = parent.parent
-                        if win == parent.player:
-                            cur.wins += 1 
-                        elif win == -1 and parent.player == root.player:
-                            cur.wins += 1
+                        if win == self.opponent[parent.player]:
+                            parent.wins += 1 
+                        elif win == -1 and parent.player != root.player:
+                            parent.wins += 1
                         parent.sims += 1
             root = Node(None, self.color, self.board, None, self.color)
             simulate_total = 10000
