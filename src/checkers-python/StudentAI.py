@@ -121,9 +121,11 @@ class StudentAI():
                     """
                     player = self.player
                     board = deepcopy(self.board)
-                    start_time = time.time()
+                    #start_time = time.time()
+                    counter = 0
                     while True:
-                        if time.time() - start_time >= 0.001:
+                        #if time.time() - start_time >= 0.01:
+                        if counter > 30:
                             black_score = get_early_heuristic(board, 1)
                             if black_score >= 0.5:
                                 return 1
@@ -148,6 +150,7 @@ class StudentAI():
                         elif boardwin == -1:
                             return -1
                         player = self.opponent[player]
+                        counter += 1
                 def mcts(self):
                     cur = self
 
@@ -187,11 +190,11 @@ class StudentAI():
                             cur.wins += 1
                         parent.sims += 1
             root = Node(None, self.color, self.board, None, self.color)
-            simulate_total = 1000
-            #start_time = time.time()
+            simulate_total = 10000
+            start_time = time.time()
             for _ in range(simulate_total):
-                #if time.time() - start_time >= MAX_TIME:
-                    #break
+                if time.time() - start_time >= MAX_TIME:
+                    break
                 root.mcts()
             next_move = max([child for child in root.children], key = lambda x: root.children[x].wins / root.children[x].sims if root.children[x].sims > 0 else -1)
             self.board.make_move(root.translation[next_move], self.color)
