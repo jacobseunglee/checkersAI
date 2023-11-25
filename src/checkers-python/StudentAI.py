@@ -134,7 +134,7 @@ class StudentAI():
                 self.board.make_move(move_init, self.color)
                 board_copy = deepcopy(self.board)
                 winner = simulate(board_copy)
-                if winner == 1:
+                if winner == 1 or winner == -1:
                     win_cnt[str(move_init)] += 1
                 self.board.undo()
 
