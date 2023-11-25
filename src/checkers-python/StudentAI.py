@@ -1,12 +1,14 @@
 from random import randint
 import math
 from copy import deepcopy
+import time
 from BoardClasses import Move
 from BoardClasses import Board
 #The following part should be completed by students.
 #Students can modify anything except the class name and exisiting functions and varibles.
 DEPTH = 3
 EXPLORATION = 1
+MAX_TIME = 2
 class StudentAI():
 
     def __init__(self,col,row,p):
@@ -178,8 +180,11 @@ class StudentAI():
                             cur.wins += 1
                         parent.sims += 1
             root = Node(None, self.color, self.board, None, self.color)
-            simulate_total = 100
+            simulate_total = 500
+            start_time = time.time()
             for _ in range(simulate_total):
+                if time.time() - start_time >= MAX_TIME:
+                    break
                 root.mcts()
             next_move = max([child for child in root.children], key = lambda x: root.children[x].wins / root.children[x].sims if root.children[x].sims > 0 else -1)
             self.board.make_move(root.translation[next_move], self.color)
