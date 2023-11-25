@@ -33,7 +33,7 @@ class StudentAI():
 
             # if depth limit is reached then return the heurstic of percentage of black pieces over total pieces
             if depth <= 0:
-                return self.get_early_heuristic(self.board, self.color)
+                return get_early_heuristic(self.board, self.color)
 
             # check for win here return 0 if white wins 1 if black wins
             if self.board.is_win(self.opponent[color]):
@@ -121,7 +121,14 @@ class StudentAI():
                     """
                     player = self.player
                     board = deepcopy(self.board)
+                    start_time = time.time()
                     while True:
+                        if time.time() - start_time >= 0.001:
+                            black_score = get_early_heuristic(board, 1)
+                            if black_score >= 0.5:
+                                return 1
+                            else:
+                                return 2
                         moves = board.get_all_possible_moves(player)
                         random_list = [moves[index][inner_index] for index in range(len(moves)) for inner_index in range(len(moves[index]))]
                         if len(random_list) == 0:
@@ -180,11 +187,11 @@ class StudentAI():
                             cur.wins += 1
                         parent.sims += 1
             root = Node(None, self.color, self.board, None, self.color)
-            simulate_total = 500
-            start_time = time.time()
+            simulate_total = 1000
+            #start_time = time.time()
             for _ in range(simulate_total):
-                if time.time() - start_time >= MAX_TIME:
-                    break
+                #if time.time() - start_time >= MAX_TIME:
+                    #break
                 root.mcts()
             next_move = max([child for child in root.children], key = lambda x: root.children[x].wins / root.children[x].sims if root.children[x].sims > 0 else -1)
             self.board.make_move(root.translation[next_move], self.color)
@@ -282,27 +289,27 @@ class StudentAI():
         self.board.make_move(move,self.color)
         return move
         ''' 
-    def get_early_heuristic(self, board, turn):
-        black = 0
-        white = 0
-        for row in range(board.row):
-            for col in range(board.col):
-                piece = board.board[row][col]
-                if piece.color == 'B':
-                    if piece.is_king:
-                        black += 1.5
-                    else:
-                        black += 1
-                    if piece.row == 0 or piece.row == (board.row - 1) or piece.col == 0 or piece.col == (board.col - 1):
-                        black += 0.2
-                elif piece.color == 'W':
-                    if piece.is_king:
-                        white += 1.5
-                    else:
-                        white += 1
-                    if piece.row == 0 or piece.row == (board.row - 1) or piece.col == 0 or piece.col == (board.col - 1):
-                        white += 0.2
-        return black / (black + white) if turn == 1 else white / (black+white)
+def get_early_heuristic(board, turn):
+    black = 0
+    white = 0
+    for row in range(board.row):
+        for col in range(board.col):
+            piece = board.board[row][col]
+            if piece.color == 'B':
+                if piece.is_king:
+                    black += 1.5
+                else:
+                    black += 1
+                if piece.row == 0 or piece.row == (board.row - 1) or piece.col == 0 or piece.col == (board.col - 1):
+                    black += 0.2
+            elif piece.color == 'W':
+                if piece.is_king:
+                    white += 1.5
+                else:
+                    white += 1
+                if piece.row == 0 or piece.row == (board.row - 1) or piece.col == 0 or piece.col == (board.col - 1):
+                    white += 0.2
+    return black / (black + white) if turn == 1 else white / (black+white)
 
 
 
