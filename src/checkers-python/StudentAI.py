@@ -7,7 +7,7 @@ from BoardClasses import Board
 #The following part should be completed by students.
 #Students can modify anything except the class name and exisiting functions and varibles.
 DEPTH = 3
-EXPLORATION = 1
+EXPLORATION = 2
 MAX_TIME = 5
 class StudentAI():
 
@@ -61,7 +61,7 @@ class StudentAI():
         
         #method = "minimax"
         method = "mcts"
-        output = open("debug.txt", 'a') # debug file
+        #output = open("debug.txt", 'a') # debug file
 
         if method == "minimax":
             # initial pass through of all possible moves
@@ -125,7 +125,7 @@ class StudentAI():
                     counter = 0
                     while True:
                         #if time.time() - start_time >= 0.01:
-                        if counter > 30:
+                        if counter > 5:
                             black_score = get_early_heuristic(board, 1)
                             if black_score >= 0.5:
                                 return 1
@@ -136,11 +136,6 @@ class StudentAI():
                         if len(random_list) == 0:
                             return self.opponent[player]
                         sim_move = self.get_random_move(random_list)
-
-                        board.show_board(output)
-                        output.write(str(sim_move))
-                        output.write('\n')
-
                         board.make_move(sim_move, player)
                         boardwin = board.is_win(player)
                         if boardwin == self.player:
