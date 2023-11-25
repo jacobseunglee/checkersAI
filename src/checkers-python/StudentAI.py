@@ -77,7 +77,7 @@ class StudentAI():
             return next_move[1]
         elif method == "mcts":
             class Node:
-                def __init__(self, parent, player, board, move):
+                def __init__(self, parent, player, board, move, root_player):
                     self.sims = 0
                     self.wins = 0
                     self.parent = parent
@@ -87,6 +87,7 @@ class StudentAI():
                     self.translation = {}
                     self.children = {}
                     self.opponent = {1:2,2:1}
+                    self.root_player = root_player
                 
                 def calculate_ucb_score(self):
                     if self.sims == 0:
@@ -100,7 +101,7 @@ class StudentAI():
                         for inner_index in range(len(moves[index])):
                             new_board = deepcopy(self.board)
                             new_board.make_move(moves[index][inner_index], self.player)
-                            self.children[str(moves[index][inner_index])] = Node(self, self.opponent[self.player], new_board, str(moves[index][inner_index]))
+                            self.children[str(moves[index][inner_index])] = Node(self, self.opponent[self.player], new_board, str(moves[index][inner_index]), self.root_player)
                             self.translation[str(moves[index][inner_index])] = moves[index][inner_index]
                 def get_random_move(self, random_list):
                     # From base code, get a random move
@@ -137,7 +138,7 @@ class StudentAI():
                             return self.opponent[self.player]
                         elif boardwin == -1:
                             return -1
-                        player = self.opponent[self.player]
+                        player = self.opponent[player]
                 def mcts(self):
                     cur = self
 
@@ -150,7 +151,10 @@ class StudentAI():
                         cur = cur.children[self.get_random_move(random_list)]
                     if cur.sims == 0:
                         win = cur.simulate()
-                        cur.wins += 1 if win == cur.player else 0
+                        if win == cur.player:
+                            cur.wins += 1 
+                        elif win == -1 and cur.player == root.player:
+                            cur.wins += 1
                     else:
                         cur.init_children()
                         random_list = [y for y in cur.children]
@@ -160,14 +164,20 @@ class StudentAI():
                             next_move  = self.get_random_move(random_list)
                             cur = cur.children[next_move]
                             win = cur.simulate()
-                        cur.wins += 1 if win == cur.player else 0
+                        if win == cur.player:
+                            cur.wins += 1 
+                        elif win == -1 and cur.player == root.player:
+                            cur.wins += 1
                     cur.sims += 1
                     parent = cur
                     while parent.parent:
                         parent = parent.parent
-                        parent.wins += 1 if win == parent.player else 0
+                        if win == parent.player:
+                            cur.wins += 1 
+                        elif win == -1 and parent.player == root.player:
+                            cur.wins += 1
                         parent.sims += 1
-            root = Node(None, self.color, self.board, None)
+            root = Node(None, self.color, self.board, None, self.color)
             simulate_total = 100
             for _ in range(simulate_total):
                 root.mcts()
