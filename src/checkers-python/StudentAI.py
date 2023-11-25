@@ -7,13 +7,8 @@ from BoardClasses import Board
 #The following part should be completed by students.
 #Students can modify anything except the class name and exisiting functions and varibles.
 DEPTH = 3
-<<<<<<< HEAD
-EXPLORATION = 2
-MAX_TIME = 5
-=======
 EXPLORATION = 1
-MAX_TIME = 2
->>>>>>> parent of dfb8812 (why is poor ai so good)
+MAX_TIME = 5
 class StudentAI():
 
     def __init__(self,col,row,p):
