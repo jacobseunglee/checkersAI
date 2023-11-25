@@ -6,6 +6,7 @@ from BoardClasses import Board
 #The following part should be completed by students.
 #Students can modify anything except the class name and exisiting functions and varibles.
 DEPTH = 3
+EXPLORATION = 1
 class StudentAI():
 
     def __init__(self,col,row,p):
@@ -74,6 +75,92 @@ class StudentAI():
             #output.write(f"final: {next_move[0]}\n")
             return next_move[1]
         elif method == "mcts":
+            class Node:
+                def __init__(self, parent, player, board, move, done):
+                    self.sims = 0
+                    self.wins = 0
+                    self.parent = parent
+                    self.player = player
+                    self.board = board
+                    self.move = move
+                    self.children = None
+                    self.done = done
+                    self.opponent = {1:2,2:1}
+                
+                def calculate_ucb_score(self):
+                    if self.sims == 0:
+                        return math.inf
+                    else:
+                        return (self.wins / self.sims)  + EXPLORATION * math.sqrt(math.log(self.parent.sims / self.sims))
+                
+                def init_children(self):
+                    moves = self.board.get_all_possible_moves(self.player)
+                    for index in range(len(moves)):
+                        for inner_index in range(len(moves[index])):
+                            new_board = deepcopy(self.board)
+                            new_board.make_move(moves[index][inner_index], self.player)
+                            if new_board.is_win(self.player):
+                                done = True
+                            self.children[str(moves[index][inner_index])] = Node(self, self.opponent(self.player), new_board, str(moves[index][inner_index]), done)
+                def get_random_move(self, random_list):
+                    # From base code, get a random move
+                    index = randint(0,len(random_list)-1)
+                    move = random_list[index]
+                    #self.board.make_move(move,self.color)
+                    return move
+                def simulate(self):
+                        """
+                        Simulates a single game from the current state and returns the winner. Logic taken from GameLogic.py
+                        Return values:
+                        -1 = Tie
+                        1 = player 1 wins (black)
+                        2 = player 2 wins (white)
+                        """
+                        player = self.player
+                        board = self.board
+                        while True:
+                            moves = board.get_moves()
+                            random_list = [moves[index][inner_index] for index in len(moves) for inner_index in len(moves[index])]
+                            sim_move = self.get_random_move(random_list)
+                            board.make_move(sim_move, player)
+                            boardwin = board.is_win(player)
+                            if boardwin == self.player:
+                                return self.player
+                            elif boardwin == self.opponent(self.player):
+                                return self.opponent(self.player)
+                            elif boardwin == -1:
+                                return -1
+                            player = self.opponent(player)
+                def mcts(self):
+                    cur = self
+                    while cur.children:
+                        m = max([x.calculate_ucb_score() for x in cur.children.values()])
+                        random_list = [y for y in cur.children if cur.children[y] == m]
+                        cur = self.get_random_move(random_list)
+                    if cur.sims == 0:
+                        win = cur.simulate()
+                        cur.wins += 1 if win == cur.player else 0
+                    else:
+                        cur.init_children()
+                        random_list = [y for y in cur.children]
+                        next_move  = self.get_random_move(random_list)
+                        cur = cur.children[next_move]
+                        win = cur.simulate()
+                        cur.wins += 1 if win == cur.player else 0
+                    cur.sims += 1
+                    parent = cur
+                    while parent.parent:
+                        parent = parent.parent
+                        parent.wins += 1 if win == parent.player else 0
+                        parent.sims += 1
+            root = Node(self.player, self.board, None, False)
+            simulate_total = 1000
+            for _ in range(simulate_total):
+                root.mcts()
+            return max([child for child in root.children], key = lambda x: root.children[x].wins / root.children[x].sims)
+                
+
+        '''
             def simulate(board):
                 """
                 Simulates a single game from the current state and returns the winner. Logic taken from GameLogic.py
@@ -152,7 +239,7 @@ class StudentAI():
             self.board.make_move(best_move[0], self.color)
             return best_move[0]
 
-        '''
+        
         if len(move) != 0:
             self.board.make_move(move,self.opponent[self.color])
         else:
@@ -186,5 +273,9 @@ class StudentAI():
                         white += 0.2
         return black / (black + white) if turn == 1 else white / (black+white)
 
+
+
+    
+            
 
 
