@@ -76,15 +76,14 @@ class StudentAI():
             return next_move[1]
         elif method == "mcts":
             class Node:
-                def __init__(self, parent, player, board, move, done):
+                def __init__(self, parent, player, board, move):
                     self.sims = 0
                     self.wins = 0
                     self.parent = parent
                     self.player = player
                     self.board = board
                     self.move = move
-                    self.children = None
-                    self.done = done
+                    self.children = {}
                     self.opponent = {1:2,2:1}
                 
                 def calculate_ucb_score(self):
@@ -99,9 +98,7 @@ class StudentAI():
                         for inner_index in range(len(moves[index])):
                             new_board = deepcopy(self.board)
                             new_board.make_move(moves[index][inner_index], self.player)
-                            if new_board.is_win(self.player):
-                                done = True
-                            self.children[str(moves[index][inner_index])] = Node(self, self.opponent(self.player), new_board, str(moves[index][inner_index]), done)
+                            self.children[str(moves[index][inner_index])] = Node(self, self.opponent[self.player], new_board, str(moves[index][inner_index]))
                 def get_random_move(self, random_list):
                     # From base code, get a random move
                     index = randint(0,len(random_list)-1)
@@ -117,26 +114,34 @@ class StudentAI():
                         2 = player 2 wins (white)
                         """
                         player = self.player
-                        board = self.board
+                        board = deepcopy(self.board)
                         while True:
-                            moves = board.get_moves()
-                            random_list = [moves[index][inner_index] for index in len(moves) for inner_index in len(moves[index])]
+                            moves = board.get_all_possible_moves(player)
+                            random_list = [moves[index][inner_index] for index in range(len(moves)) for inner_index in range(len(moves[index]))]
+                            if len(random_list) == 0:
+                                return self.opponent[player]
                             sim_move = self.get_random_move(random_list)
                             board.make_move(sim_move, player)
                             boardwin = board.is_win(player)
                             if boardwin == self.player:
                                 return self.player
-                            elif boardwin == self.opponent(self.player):
-                                return self.opponent(self.player)
+                            elif boardwin == self.opponent[self.player]:
+                                return self.opponent[self.player]
                             elif boardwin == -1:
                                 return -1
-                            player = self.opponent(player)
+                            player = self.opponent[self.player]
                 def mcts(self):
                     cur = self
-                    while cur.children:
+
+                    output = open("debug.txt", 'a')
+
+                    while len(cur.children) > 0:
                         m = max([x.calculate_ucb_score() for x in cur.children.values()])
-                        random_list = [y for y in cur.children if cur.children[y] == m]
-                        cur = self.get_random_move(random_list)
+                        random_list = [y for y in cur.children if cur.children[y].calculate_ucb_score() == m]
+                        # if len(random_list) == 0:
+                        #     win = self.opponent[cur.player]
+                        # else:
+                        cur = cur.children[self.get_random_move(random_list)]
                     if cur.sims == 0:
                         win = cur.simulate()
                         cur.wins += 1 if win == cur.player else 0
@@ -153,11 +158,11 @@ class StudentAI():
                         parent = parent.parent
                         parent.wins += 1 if win == parent.player else 0
                         parent.sims += 1
-            root = Node(self.player, self.board, None, False)
-            simulate_total = 1000
+            root = Node(None, self.color, self.board, None)
+            simulate_total = 4
             for _ in range(simulate_total):
                 root.mcts()
-            return max([child for child in root.children], key = lambda x: root.children[x].wins / root.children[x].sims)
+            return max([child for child in root.children], key = lambda x: root.children[x].wins / root.children[x].sims if root.children[x].sims > 0 else -1)
                 
 
         '''
